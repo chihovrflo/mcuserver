@@ -6,6 +6,7 @@ class MCU {
     this.host = host;
     this.url = `${host}:${port}`;
     this.socket = null;
+    this.listeners = [];
   }
 
   connect () {
@@ -40,6 +41,16 @@ class MCU {
     if (this.socket) return true;
     console.log(`${this.url} 尚未連接!`);
     return false;
+  }
+
+  addListener (ws) {
+    const newListenerList = [...this.listeners, ws];
+    this.listeners = newListenerList;
+  }
+
+  removeListener (wsId) {
+    const newListenerList = this.listeners.map((ws) => ws.id !== wsId);
+    this.listeners = newListenerList;
   }
 }
 

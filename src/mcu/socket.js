@@ -1,10 +1,10 @@
 import net from 'net';
 
-class MCU {
+export default class MCUSocket {
   constructor ({ port, host }) {
     this.port = port;
     this.host = host;
-    this.url = `${host}:${port}`;
+    this.ip = `${host}:${port}`;
     this.socket = null;
     this.listeners = [];
   }
@@ -13,7 +13,7 @@ class MCU {
     this.socket = net.connect({
       port: this.port,
       host: this.host
-    }, () => console.log(`${this.url} 連接成功!`));
+    }, () => console.log(`${this.ip} 連接成功!`));
   }
 
   write (cmd) {
@@ -26,7 +26,6 @@ class MCU {
     if (this.isConnected) {
       this.socket.on('data', (data) => {
         callback(data.toString());
-        this.socket.end();
       });
     }
   }
@@ -38,8 +37,8 @@ class MCU {
   }
 
   isConnected () {
-    if (this.socket) return true;
-    console.log(`${this.url} 尚未連接!`);
+    if (this.socket?.readyState === WebSocket.OPEN) return true;
+    console.log(`${this.ip} 尚未連接!`);
     return false;
   }
 
@@ -53,5 +52,3 @@ class MCU {
     this.listeners = newListenerList;
   }
 }
-
-export default MCU;

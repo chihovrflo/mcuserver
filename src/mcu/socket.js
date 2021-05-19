@@ -9,21 +9,19 @@ export default class MCUSocket {
     this.listeners = [];
   }
 
-  connect () {
-    this.socket = net.connect({
+  async connect () {
+    this.socket = await net.connect({
       port: this.port,
       host: this.host
     }, () => console.log(`${this.ip} 連接成功!`));
   }
 
-  write (cmd) {
-    if (this.isConnected) {
-      this.socket.write(cmd);
-    }
+  command (type, data = {}) {
+    if (this.isConnected()) this.socket.write({ type, data });
   }
 
   onData (callback) {
-    if (this.isConnected) {
+    if (this.isConnected()) {
       this.socket.on('data', (data) => {
         callback(data.toString());
       });
@@ -31,24 +29,29 @@ export default class MCUSocket {
   }
 
   onEnd () {
-    if (this.isConnected) {
+    if (this.isConnected()) {
       this.socket.on('end', () => console.log('結束連線!'));
     }
   }
 
   isConnected () {
-    if (this.socket?.readyState === WebSocket.OPEN) return true;
+    if (this.socket?.readyState === 'open') return true;
     console.log(`${this.ip} 尚未連接!`);
     return false;
   }
 
   addListener (ws) {
     const newListenerList = [...this.listeners, ws];
+    console.log(newListenerList);
     this.listeners = newListenerList;
   }
 
   removeListener (wsId) {
     const newListenerList = this.listeners.map((ws) => ws.id !== wsId);
     this.listeners = newListenerList;
+  }
+
+  broadcast () {
+    this.listeners.forEach((ws) => ws.send('broadcast OK'));
   }
 }

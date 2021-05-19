@@ -1,8 +1,10 @@
 import WebSocket from 'ws';
+import MCUDetector from 'mcu/detector';
 import getUniqueID from './getUniqueID';
 
 export default function ({ server }) {
   const wss = new WebSocket.Server({ server });
+  const detector = new MCUDetector();
 
   wss.getUniqueID = getUniqueID;
 
@@ -11,16 +13,20 @@ export default function ({ server }) {
     wss.clients.forEach((client) => console.log('Client.ID: ' + client.id));
     console.log('--------------');
 
-    ws.on('message', function (msg) {
-      // const mcu1 = new MCUSocket({ port: 1500, host: '192.168.51.5' });
-      // mcu1.connect();
-      // mcu1.write('FanOn');
-      // mcu1.onData((data) => {
-      //   ws.send(data);
-      //   console.log(`received data: ${data}`);
-      // });
-      console.log(msg);
-      ws.send(msg);
+    ws.on('message', async function (msg) {
+      const parseMsg = JSON.parse(msg);
+      switch (parseMsg.type) {
+        case 'ADD_MCU_SOCKET': {
+          const { port, host } = parseMsg.data;
+          const socket = await detector.detectMCUSocket({ port, host });
+          if (socket) {
+            socket.addListener(ws);
+            setTimeout(() => {
+              socket.broadcast();
+            }, 3000);
+          }
+        }
+      }
     });
     ws.on('close', () => console.log(`${ws.id} is closed!`));
   });

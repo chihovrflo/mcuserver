@@ -13,15 +13,17 @@ export default function ({ server }) {
     wss.clients.forEach((client) => console.log('Client.ID: ' + client.id));
     console.log('--------------');
 
-    ws.on('message', function (msg) {
+    ws.on('message', async function (msg) {
       const parseMsg = JSON.parse(msg);
       switch (parseMsg.type) {
         case 'ADD_MCU_SOCKET': {
           const { port, host } = parseMsg.data;
-          const socket = detector.detectMCUSocket({ port, host });
-          if (socket?.isConnected()) {
+          const socket = await detector.detectMCUSocket({ port, host });
+          if (socket) {
             socket.addListener(ws);
-            setTimeout(() => socket.broadcast(), 3000);
+            setTimeout(() => {
+              socket.broadcast();
+            }, 3000);
           }
         }
       }

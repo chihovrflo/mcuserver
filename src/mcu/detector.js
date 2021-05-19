@@ -5,19 +5,19 @@ export default class MCUDetector {
     this.mcuSocketList = [];
   }
 
-  detectMCUSocket ({ port, host }) {
+  async detectMCUSocket ({ port, host }) {
     const targetIndex = this.mcuSocketList.findIndex((mcuSocket) => mcuSocket.ip === `${host}:${port}`);
-    if (targetIndex === -1) this.addMCUSocket({ port, host });
+    if (targetIndex === -1) return await this.addMCUSocket({ port, host });
     return this.mcuSocketList[targetIndex];
   }
 
-  addMCUSocket ({ port, host }) {
+  async addMCUSocket ({ port, host }) {
     try {
       const mcuSocket = new MCUSocket({ port, host });
-      mcuSocket.connect();
-      if (!mcuSocket.isConnected()) throw new Error('mcu socket is not connected!');
+      await mcuSocket.connect();
       const newMCUSocketList = [...this.mcuSocketList, mcuSocket];
       this.mcuSocketList = newMCUSocketList;
+      return mcuSocket;
     } catch (error) {
       console.log('Add MCU Socket error:', error);
     }

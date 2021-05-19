@@ -14,17 +14,15 @@ export default function ({ server }) {
     console.log('--------------');
 
     ws.on('message', function (msg) {
-      console.log(msg);
       const parseMsg = JSON.parse(msg);
-      console.log(parseMsg.type);
       switch (parseMsg.type) {
         case 'ADD_MCU_SOCKET': {
           const { port, host } = parseMsg.data;
           const socket = detector.detectMCUSocket({ port, host });
           if (socket?.isConnected()) {
             socket.addListener(ws);
+            setTimeout(() => socket.broadcast(), 3000);
           }
-          setTimeout(() => socket.broadcast(), 3000);
         }
       }
     });

@@ -35,7 +35,7 @@ export default class MCUSocket {
   }
 
   isConnected () {
-    if (this.socket.readyState === 'open') return true;
+    if (this.socket?.readyState === 'open') return true;
     console.log(`${this.ip} 尚未連接!`);
     return false;
   }

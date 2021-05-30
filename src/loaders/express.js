@@ -1,6 +1,7 @@
 // import bodyParser from 'body-parser';
 import routes from 'api';
 import config from 'config';
+import cors from 'cors';
 
 export default function ({ app }) {
   app.get('/status', (req, res) => {
@@ -11,7 +12,7 @@ export default function ({ app }) {
   });
 
   // 處理 cors
-  // app.use(cors());
+  app.use(cors());
 
   // req.body 轉成 json
   // app.use(bodyParser.json());

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { urlencoded } from 'body-parser';
+import getUniqueID from 'websocket/getUniqueID';
 const route = Router();
 const urlencodedParser = urlencoded({extended: false});
 const appDirectory = fs.realpathSync(process.cwd());
@@ -21,21 +22,36 @@ export default function (app) {
   route.post('/addlist', urlencodedParser, (req, res) => {
     fs.readFile(mculistPath, 'utf8', (err, data) => {
       var obj = JSON.parse(data);
-      var isExist = false;
+      var exists = false;
       obj.list.forEach(item => {
         if((item.name === req.body.name)||(item.host === req.body.host)){
-          isExist = true;
+          exists = true;
         }
       })
-      if(isExist)
-        res.send('already exist').status(400);
+      if(exists)
+        res.send('already existed').status(400);
       else{
-        obj.list.push(req.body);
+        obj.list.push({
+          id: getUniqueID(),
+          ...req.body,
+        });
         fs.writeFile(mculistPath, JSON.stringify(obj), (err, res) => {
           if(err) console.log("error: ", err);
         })
         res.send('OK').status(200);
       }
+    })
+  })
+
+  route.post('/updatelist', urlencodedParser, (req, res) => {
+    fs.readFile(mculistPath, 'utf8', (err, data) => {
+      var obj = JSON.parse(data);
+      var newlist = obj.list.map(item => (item.id === req.body.id) ? req.body : item)
+      obj.list = newlist; 
+      fs.writeFile(mculistPath, JSON.stringify(obj), (err, res) => {
+        if(err) console.log("error: ", err);
+      })
+      res.send('OK').status(200);
     })
   })
 

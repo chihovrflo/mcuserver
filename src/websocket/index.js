@@ -18,12 +18,28 @@ export default function ({ server }) {
       switch (parseMsg.type) {
         case 'ADD_MCU_SOCKET': {
           const { port, host } = parseMsg.data;
-          const socket = await detector.detectMCUSocket({ port, host });
-          if (socket) {
+          const socket = detector.detectMCUSocket({ port, host });
+          socket.connect(() => {
+            socket.onData((data) => {
+              console.log(data);
+              ws.send(data);
+            });
             socket.addListener(ws);
-            setTimeout(() => {
-              socket.broadcast();
-            }, 3000);
+            ws.socket = socket;
+          });
+          break;
+        }
+        case 'SOCKET_CMD': {
+          if (ws.socket) {
+            let { type, data } = parseMsg.payload;
+            if(type === 'TempSetup' || type === 'FanSetup' || type === 'BulbSetup')
+              ws.socket.command(`${type} ${data.temp}`);
+            else{
+              console.log(type);
+              if(ws.socket) console.log('socket exists');
+              else console.log('socket is not exist');
+              ws.socket.command(type);
+            }
           }
         }
       }

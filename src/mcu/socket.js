@@ -9,15 +9,23 @@ export default class MCUSocket {
     this.listeners = [];
   }
 
-  async connect () {
+  async connect (callback) {
     this.socket = await net.connect({
       port: this.port,
       host: this.host
-    }, () => console.log(`${this.ip} 連接成功!`));
+    }, () => {
+      console.log(`connect: ${this.ip} 連接成功!`);
+      callback();
+    });
   }
 
-  command (type, data = {}) {
-    if (this.isConnected()) this.socket.write({ type, data });
+  command (event) {
+    if (this.isConnected()) {
+      this.socket.write(event,() => {
+        console.log();
+      });
+      console.log(event);
+    }
   }
 
   onData (callback) {
@@ -36,13 +44,12 @@ export default class MCUSocket {
 
   isConnected () {
     if (this.socket?.readyState === 'open') return true;
-    console.log(`${this.ip} 尚未連接!`);
+    console.log(`isconnected: ${this.ip} 尚未連接!`);
     return false;
   }
 
   addListener (ws) {
     const newListenerList = [...this.listeners, ws];
-    console.log(newListenerList);
     this.listeners = newListenerList;
   }
 

@@ -1,11 +1,11 @@
 import WebSocket from 'ws';
 import MCUDetector from 'mcu/detector';
 import getUniqueID from './getUniqueID';
+import { setUpDisplay, setUpAuto, setUpManual } from './actions';
 
 export default function ({ server }) {
   const wss = new WebSocket.Server({ server });
   const detector = new MCUDetector();
-
   wss.getUniqueID = getUniqueID;
 
   wss.on('connection', function (ws) {
@@ -21,9 +21,11 @@ export default function ({ server }) {
           const socket = detector.detectMCUSocket({ port, host });
           socket.connect(() => {
             socket.onData((data) => {
-              console.log(data);
-              ws.send(data);
+              if (data.includes('OK, Now targetTemp is')) ws.send(setUpAuto(data));
+              else if (data.includes('envTemp')) ws.send(setUpDisplay(data));
+              else ws.send(setUpManual(data));
             });
+            socket.onEnd();
             socket.addListener(ws);
             ws.socket = socket;
           });
@@ -31,13 +33,8 @@ export default function ({ server }) {
         }
         case 'SOCKET_CMD': {
           if (ws.socket) {
-            let { type, data } = parseMsg.payload;
-            if(type === 'TempSetup' || type === 'FanSetup' || type === 'BulbSetup')
-              ws.socket.command(`${type} ${data.temp}`);
-            else{
-              console.log(type);
-              if(ws.socket) console.log('socket exists');
-              else console.log('socket is not exist');
+            const { type, data } = parseMsg.payload;
+            if (type === 'TempSetup' || type === 'FanSetup' || type === 'BulbSetup') { ws.socket.command(`${type} ${data.temp}`); } else {
               ws.socket.command(type);
             }
           }

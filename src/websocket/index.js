@@ -1,7 +1,6 @@
 import WebSocket from 'ws';
 import MCUDetector from 'mcu/detector';
 import getUniqueID from './getUniqueID';
-import { setUpDisplay, setUpAuto, setUpManual } from './actions';
 
 export default function ({ server }) {
   const wss = new WebSocket.Server({ server });
@@ -18,18 +17,10 @@ export default function ({ server }) {
       switch (parseMsg.type) {
         case 'ADD_MCU_SOCKET': {
           const { port, host } = parseMsg.data;
-          const socket = detector.detectMCUSocket({ port, host });
-          socket.connect(() => {
-            socket.onData((data) => {
-              if (data.includes('OK, Now targetTemp is')) ws.send(setUpAuto(data));
-              else if (data.includes('envTemp')) ws.send(setUpDisplay(data));
-              else ws.send(setUpManual(data));
-            });
-            socket.setInterval();
-            socket.onEnd();
-            socket.addListener(ws);
-            ws.socket = socket;
-          });
+          const socket = detector.detectMCUSocket({ port, host, wsId: ws.id });
+          socket.addListener(ws);
+          ws.socket = socket;
+          ws.send(JSON.stringify({ type: 'SET_WS_ID', wsId: ws.id }));
           break;
         }
         case 'SOCKET_CMD': {

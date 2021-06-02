@@ -1,4 +1,5 @@
 import net from 'net';
+import { setUpDisplay, setUpAuto, setUpManual } from './actions';
 
 export default class MCUSocket {
   constructor ({ port, host }) {
@@ -35,21 +36,25 @@ export default class MCUSocket {
     }
   }
 
-  onData (callback) {
+  onData () {
     if (this.isConnected()) {
       this.socket.on('data', (data) => {
-        callback(data.toString());
+        const src = data.toString();
+        if (src.includes('OK, Now targetTemp is')) console.log(setUpAuto(data));
+        else if (src.includes('envTemp')) this.broadcast(setUpDisplay(src));
+        else console.log(setUpManual(src));
       });
     }
   }
 
-  onEnd () {
+  onEnd (callback) {
     if (this.isConnected()) {
       const that = this;
       this.socket.on('end', () => {
         console.log('結束連線!');
         clearInterval(that.interval);
         console.log('interval: ', that.interval);
+        callback();
       });
     }
   }
@@ -70,7 +75,8 @@ export default class MCUSocket {
     this.listeners = newListenerList;
   }
 
-  broadcast () {
-    this.listeners.forEach((ws) => ws.send('broadcast OK'));
+  broadcast (data) {
+    console.log('broadcast: ', data);
+    this.listeners.forEach((ws) => ws.send(data));
   }
 }

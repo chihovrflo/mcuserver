@@ -5,16 +5,15 @@ export default class MCUDetector {
     this.mcuSocketList = [];
   }
 
-  async detectMCUSocket ({ port, host }) {
+  detectMCUSocket ({ port, host }) {
     const targetIndex = this.mcuSocketList.findIndex((mcuSocket) => mcuSocket.ip === `${host}:${port}`);
-    if (targetIndex === -1) return await this.addMCUSocket({ port, host });
+    if (targetIndex === -1) return this.addMCUSocket({ port, host });
     return this.mcuSocketList[targetIndex];
   }
 
-  async addMCUSocket ({ port, host }) {
+  addMCUSocket ({ port, host }) {
     try {
       const mcuSocket = new MCUSocket({ port, host });
-      await mcuSocket.connect();
       const newMCUSocketList = [...this.mcuSocketList, mcuSocket];
       this.mcuSocketList = newMCUSocketList;
       return mcuSocket;

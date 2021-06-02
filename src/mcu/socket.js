@@ -7,6 +7,7 @@ export default class MCUSocket {
     this.ip = `${host}:${port}`;
     this.socket = null;
     this.listeners = [];
+    this.interval = null;
   }
 
   async connect (callback) {
@@ -21,10 +22,16 @@ export default class MCUSocket {
 
   command (event) {
     if (this.isConnected()) {
-      this.socket.write(event,() => {
-        console.log();
-      });
-      console.log(event);
+      this.socket.write(event);
+    }
+  }
+
+  setInterval () {
+    if (this.isConnected()) {
+      const that = this;
+      this.interval = setInterval(() => {
+        that.socket.write('DataRead');
+      }, 1000);
     }
   }
 
@@ -38,7 +45,12 @@ export default class MCUSocket {
 
   onEnd () {
     if (this.isConnected()) {
-      this.socket.on('end', () => console.log('結束連線!'));
+      const that = this;
+      this.socket.on('end', () => {
+        console.log('結束連線!');
+        clearInterval(that.interval);
+        console.log('interval: ', that.interval);
+      });
     }
   }
 

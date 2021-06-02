@@ -25,6 +25,7 @@ export default function ({ server }) {
               else if (data.includes('envTemp')) ws.send(setUpDisplay(data));
               else ws.send(setUpManual(data));
             });
+            socket.setInterval();
             socket.onEnd();
             socket.addListener(ws);
             ws.socket = socket;
@@ -34,7 +35,9 @@ export default function ({ server }) {
         case 'SOCKET_CMD': {
           if (ws.socket) {
             const { type, data } = parseMsg.payload;
-            if (type === 'TempSetup' || type === 'FanSetup' || type === 'BulbSetup') { ws.socket.command(`${type} ${data.temp}`); } else {
+            if (type === 'TempSetup' || type === 'FanSetup' || type === 'BulbSetup') {
+              ws.socket.command(`${type} ${data.temp}`);
+            } else {
               ws.socket.command(type);
             }
           }

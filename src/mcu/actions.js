@@ -18,7 +18,7 @@ function setUpManual (data) {
 }
 
 export default function setUp (src) {
-  if (src.includes('OK, Now targetTemp is')) setUpAuto(src);
-  else if (src.includes('envTemp')) setUpDisplay(src);
-  else setUpManual(src);
+  if (src.includes('OK, Now targetTemp is')) return setUpAuto(src);
+  else if (src.includes('envTemp')) return setUpDisplay(src);
+  else return setUpManual(src);
 }

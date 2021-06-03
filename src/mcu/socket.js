@@ -11,9 +11,7 @@ export default class MCUSocket {
     this.interval = null;
   }
 
-  async connect ({
-    onEnd = () => {}
-  }) {
+  async connect () {
     this.socket = await net.connect({
       port: this.port,
       host: this.host
@@ -28,11 +26,10 @@ export default class MCUSocket {
         console.log('結束連線!');
         clearInterval(self.interval);
         console.log('interval: ', self.interval);
-        onEnd();
       });
-      this.interval = setInterval(() => {
+      /* this.interval = setInterval(() => {
         self.socket.write('DataRead');
-      }, 1000);
+      }, 1000); */
     });
   }
 

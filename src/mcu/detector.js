@@ -27,9 +27,14 @@ export default class MCUDetector {
     let targetSocketIsExist = false;
     const newMCUSocketList = this.mcuSocketList.map((mcuSocket) => {
       const isNotTargetSocket = mcuSocket.ip !== ip;
-      if (!isNotTargetSocket) targetSocketIsExist = true;
+      if (!isNotTargetSocket) {
+        clearInterval(mcuSocket.interval);
+        mcuSocket.socket.destroy();
+        targetSocketIsExist = true;
+      }
       return isNotTargetSocket;
     });
+    if (!targetSocketIsExist) console.log('remove MCU Socket target is NOT Exist');
     this.mcuSocketList = newMCUSocketList;
   }
 }

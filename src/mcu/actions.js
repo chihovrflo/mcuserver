@@ -1,20 +1,20 @@
 function setUpDisplay (data) {
-  return JSON.stringify({
+  return {
     type: 'setUpDisplay',
     payload: data
-  });
+  };
 }
 function setUpAuto (data) {
-  return JSON.stringify({
+  return {
     type: 'setUpAuto',
     payload: data
-  });
+  };
 }
 function setUpManual (data) {
-  return JSON.stringify({
+  return {
     type: 'setUpManual',
     payload: data
-  });
+  };
 }
 
 export default function setUp (src) {

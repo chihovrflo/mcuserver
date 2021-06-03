@@ -23,13 +23,11 @@ export default class MCUSocket {
         this.broadcast(setUp(src));
       });
       this.socket.on('end', () => {
-        console.log('結束連線!');
-        clearInterval(self.interval);
-        console.log('interval: ', self.interval);
+        console.log(`connect: ${this.ip} 結束連線!`);
       });
-      /* this.interval = setInterval(() => {
+      this.interval = setInterval(() => {
         self.socket.write('DataRead');
-      }, 1000); */
+      }, 1000);
     });
   }
 
@@ -46,17 +44,23 @@ export default class MCUSocket {
   }
 
   addListener (ws) {
-    const newListenerList = [...this.listeners, ws];
-    this.listeners = newListenerList;
+    const wsIndex = this.listeners.findIndex((listener) => listener.id === ws.id);
+    if (wsIndex === -1) {
+      const newListenerList = [...this.listeners, ws];
+      this.listeners = newListenerList;
+    } else console.log(`add listener: ws ${ws.id} is exist!`);
   }
 
   removeListener (wsId) {
-    const newListenerList = this.listeners.map((ws) => ws.id !== wsId);
-    this.listeners = newListenerList;
+    const wsIndex = this.listeners.findIndex((listener) => listener.id === wsId);
+    if (wsIndex !== -1) {
+      const newListenerList = [...this.listeners];
+      newListenerList.splice(wsIndex, 1);
+      this.listeners = newListenerList;
+    } else console.log(`remove listener: ws ${wsId} is not exist!`);
   }
 
   broadcast (data) {
-    console.log('broadcast: ', data);
-    this.listeners.forEach((ws) => ws.send(data));
+    this.listeners.forEach((ws) => ws.send(JSON.stringify(data)));
   }
 }

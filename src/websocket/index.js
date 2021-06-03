@@ -12,7 +12,7 @@ export default function ({ server }) {
     wss.clients.forEach((client) => console.log('Client.ID: ' + client.id));
     console.log('--------------');
 
-    ws.on('message', async function (msg) {
+    ws.on('message', function (msg) {
       const parseMsg = JSON.parse(msg);
       switch (parseMsg.type) {
         case 'ADD_MCU_SOCKET': {
@@ -20,7 +20,6 @@ export default function ({ server }) {
           const socket = detector.detectMCUSocket({ port, host, wsId: ws.id });
           socket.addListener(ws);
           ws.socket = socket;
-          ws.send(JSON.stringify({ type: 'SET_WS_ID', wsId: ws.id }));
           break;
         }
         case 'SOCKET_CMD': {
@@ -35,6 +34,13 @@ export default function ({ server }) {
         }
       }
     });
-    ws.on('close', () => console.log(`${ws.id} is closed!`));
+    ws.on('close', () => {
+      ws.socket.removeListener(ws.id);
+      if (ws.socket.listeners.length === 0) {
+        console.log(`${ws.socket.ip} listeners is Empty!`);
+        detector.removeMCUSocket(ws.socket.ip);
+      }
+      console.log(`${ws.id} is closed!`);
+    });
   });
 }

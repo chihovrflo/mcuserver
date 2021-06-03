@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import MCUDetector from 'mcu/detector';
-import getUniqueID from './getUniqueID';
+import getUniqueID from 'utils/getUniqueID';
 
 export default function ({ server }) {
   const wss = new WebSocket.Server({ server });

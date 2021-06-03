@@ -1,5 +1,5 @@
 import net from 'net';
-import { setUpDisplay, setUpAuto, setUpManual } from './actions';
+import setUp from './actions';
 
 export default class MCUSocket {
   constructor ({ port, host }) {
@@ -11,51 +11,34 @@ export default class MCUSocket {
     this.interval = null;
   }
 
-  async connect (callback) {
+  async connect ({
+    onEnd = () => {}
+  }) {
     this.socket = await net.connect({
       port: this.port,
       host: this.host
     }, () => {
       console.log(`connect: ${this.ip} 連接成功!`);
-      callback();
+      const self = this;
+      this.socket.on('data', (data) => {
+        const src = data.toString();
+        this.broadcast(setUp(src));
+      });
+      this.socket.on('end', () => {
+        console.log('結束連線!');
+        clearInterval(self.interval);
+        console.log('interval: ', self.interval);
+        onEnd();
+      });
+      this.interval = setInterval(() => {
+        self.socket.write('DataRead');
+      }, 1000);
     });
   }
 
   command (event) {
     if (this.isConnected()) {
       this.socket.write(event);
-    }
-  }
-
-  setInterval () {
-    if (this.isConnected()) {
-      const that = this;
-      this.interval = setInterval(() => {
-        that.socket.write('DataRead');
-      }, 1000);
-    }
-  }
-
-  onData () {
-    if (this.isConnected()) {
-      this.socket.on('data', (data) => {
-        const src = data.toString();
-        if (src.includes('OK, Now targetTemp is')) console.log(setUpAuto(data));
-        else if (src.includes('envTemp')) this.broadcast(setUpDisplay(src));
-        else console.log(setUpManual(src));
-      });
-    }
-  }
-
-  onEnd (callback) {
-    if (this.isConnected()) {
-      const that = this;
-      this.socket.on('end', () => {
-        console.log('結束連線!');
-        clearInterval(that.interval);
-        console.log('interval: ', that.interval);
-        callback();
-      });
     }
   }
 

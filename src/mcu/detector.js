@@ -14,11 +14,7 @@ export default class MCUDetector {
   addMCUSocket ({ port, host }) {
     try {
       const mcuSocket = new MCUSocket({ port, host });
-      mcuSocket.connect(() => {
-        mcuSocket.onData();
-        mcuSocket.setInterval();
-        mcuSocket.onEnd();
-      });
+      mcuSocket.connect();
       const newMCUSocketList = [...this.mcuSocketList, mcuSocket];
       this.mcuSocketList = newMCUSocketList;
       return mcuSocket;
@@ -34,7 +30,6 @@ export default class MCUDetector {
       if (!isNotTargetSocket) targetSocketIsExist = true;
       return isNotTargetSocket;
     });
-
     this.mcuSocketList = newMCUSocketList;
   }
 }

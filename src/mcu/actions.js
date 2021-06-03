@@ -1,18 +1,24 @@
-export function setUpDisplay (data) {
+function setUpDisplay (data) {
   return JSON.stringify({
     type: 'setUpDisplay',
     payload: data
   });
 }
-export function setUpAuto (data) {
+function setUpAuto (data) {
   return JSON.stringify({
     type: 'setUpAuto',
     payload: data
   });
 }
-export function setUpManual (data) {
+function setUpManual (data) {
   return JSON.stringify({
     type: 'setUpManual',
     payload: data
   });
+}
+
+export default function setUp (src) {
+  if (src.includes('OK, Now targetTemp is')) setUpAuto(src);
+  else if (src.includes('envTemp')) setUpDisplay(src);
+  else setUpManual(src);
 }

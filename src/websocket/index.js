@@ -36,10 +36,10 @@ export default function ({ server }) {
     });
     ws.on('close', () => {
       ws.socket.removeListener(ws.id);
-      if (ws.socket.listeners.length === 0) {
-        console.log(`${ws.socket.ip} listeners is Empty!`);
-        detector.removeMCUSocket(ws.socket.ip);
-      }
+      // if (ws.socket.listeners.length === 0) {
+      //   console.log(`${ws.socket.ip} listeners is Empty!`);
+      //   detector.removeMCUSocket(ws.socket.ip);
+      // }
       console.log(`${ws.id} is closed!`);
     });
   });

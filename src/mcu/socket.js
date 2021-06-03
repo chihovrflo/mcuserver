@@ -24,8 +24,6 @@ export default class MCUSocket {
       });
       this.socket.on('end', () => {
         console.log(`connect: ${this.ip} 結束連線!`);
-        clearInterval(self.interval);
-        console.log('interval: ', self.interval);
       });
       this.interval = setInterval(() => {
         self.socket.write('DataRead');

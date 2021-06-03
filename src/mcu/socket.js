@@ -1,4 +1,5 @@
 import net from 'net';
+import setUp from './actions';
 
 export default class MCUSocket {
   constructor ({ port, host }) {
@@ -7,38 +8,34 @@ export default class MCUSocket {
     this.ip = `${host}:${port}`;
     this.socket = null;
     this.listeners = [];
+    this.interval = null;
   }
 
-  async connect (callback) {
+  async connect () {
     this.socket = await net.connect({
       port: this.port,
       host: this.host
     }, () => {
       console.log(`connect: ${this.ip} 連接成功!`);
-      callback();
+      const self = this;
+      this.socket.on('data', (data) => {
+        const src = data.toString();
+        this.broadcast(setUp(src));
+      });
+      this.socket.on('end', () => {
+        console.log('結束連線!');
+        clearInterval(self.interval);
+        console.log('interval: ', self.interval);
+      });
+      /* this.interval = setInterval(() => {
+        self.socket.write('DataRead');
+      }, 1000); */
     });
   }
 
   command (event) {
     if (this.isConnected()) {
-      this.socket.write(event,() => {
-        console.log();
-      });
-      console.log(event);
-    }
-  }
-
-  onData (callback) {
-    if (this.isConnected()) {
-      this.socket.on('data', (data) => {
-        callback(data.toString());
-      });
-    }
-  }
-
-  onEnd () {
-    if (this.isConnected()) {
-      this.socket.on('end', () => console.log('結束連線!'));
+      this.socket.write(event);
     }
   }
 
@@ -58,7 +55,8 @@ export default class MCUSocket {
     this.listeners = newListenerList;
   }
 
-  broadcast () {
-    this.listeners.forEach((ws) => ws.send('broadcast OK'));
+  broadcast (data) {
+    console.log('broadcast: ', data);
+    this.listeners.forEach((ws) => ws.send(data));
   }
 }

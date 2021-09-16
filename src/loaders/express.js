@@ -10,7 +10,7 @@ export default function ({ app }) {
     res.status(200).end();
   });
 
-  app.use(cors());
+  app.use(cors({origin: '*'}));
 
   app.use(config.api.prefix, routes());
 

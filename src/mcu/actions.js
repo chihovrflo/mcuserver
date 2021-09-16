@@ -16,9 +16,16 @@ function setUpManual (data) {
     payload: data
   };
 }
+function setUpConfig (data) {
+  return {
+    type: 'setUpConfig',
+    payload: data
+  };
+}
 
 export default function setUp (src) {
   if (src.includes('OK, Now targetTemp is')) return setUpAuto(src);
   else if (src.includes('envTemp')) return setUpDisplay(src);
+  else if(src.includes('BTC')) return setUpConfig(src);
   else return setUpManual(src);
 }

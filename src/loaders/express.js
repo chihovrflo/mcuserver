@@ -1,6 +1,7 @@
 import cors from 'cors';
 import routes from 'api';
 import config from 'config';
+import express from 'express';
 
 export default function ({ app }) {
   app.get('/status', (req, res) => {
@@ -10,7 +11,9 @@ export default function ({ app }) {
     res.status(200).end();
   });
 
-  app.use(cors({origin: '*'}));
+  app.use(cors());
+
+  app.use(express.json());
 
   app.use(config.api.prefix, routes());
 
